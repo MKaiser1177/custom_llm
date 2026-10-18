@@ -1,151 +1,194 @@
-# Custom LLM Chatbot
+# Casual LLM — SmolLM2 Chatbot & FastAPI Web UI
 
-A lightweight local chatbot that runs a small instruction-tuned language model from Hugging Face in the terminal. The app loads `HuggingFaceTB/SmolLM2-360M-Instruct`, keeps a short chat history, and generates warm, casual responses based on your prompts.
+A modern, responsive AI chatbot powered by Hugging Face's lightweight `HuggingFaceTB/SmolLM2-360M-Instruct` language model running locally on CPU.
 
-## What this project does
+Casual LLM provides both an **interactive Web UI** built with HTML5, CSS3, and JavaScript, backed by a **FastAPI server** supporting real-time token-by-token streaming via Server-Sent Events (SSE), and a **minimal terminal CLI** for quick console testing.
 
-This project is a minimal command-line chat interface built with:
+---
 
-- Python
-- Hugging Face `transformers`
-- PyTorch
-- A local model downloaded from Hugging Face
+## ✨ Features
 
-It is designed for experimenting with small open-source LLMs without needing a web UI or remote API.
+- **🎨 Modern Web UI**:
+  - Responsive, clean layout built with vanilla HTML, CSS, and JavaScript (no heavy build tools or Node.js required).
+  - **Dark & Light Mode**: Seamless theme toggle with persisted theme preference.
+  - **Real-Time Streaming**: Word-by-word streaming generation with blinking cursor and instant responsiveness.
+  - **Stop Generation**: Cancel generation mid-stream with a single click.
+  - **Multi-Session Chat History**: Create new chats, switch between conversations, and delete chats (stored securely in `localStorage`).
+  - **Markdown & Code Rendering**: Nicely rendered markdown headings, lists, inline code, and syntax blocks with a 1-click "Copy Code" button.
+  - **Inference Parameter Controls**: Live sliders for Temperature, Top-P, Max Tokens, and Repetition Penalty.
+  - **Persona Presets**: Easily switch between *Cheerful & Friendly*, *Expert Coder*, *Concise & Direct*, *Creative Writer*, or custom system instructions.
+  - **Starter Prompt Chips**: Quick one-click prompts on empty chats to start chatting immediately.
 
-## Project files
+- **⚡ FastAPI Deployment**:
+  - `POST /api/chat/stream`: Real-time streaming generation endpoint using Hugging Face's `TextIteratorStreamer` and Server-Sent Events (SSE).
+  - `POST /api/chat`: Synchronous JSON endpoint for standard API requests.
+  - `GET /api/health`: Health status & CPU model readiness probe.
+  - `GET /api/model-info`: Returns current model name and default inference hyperparameters.
+  - Interactive Swagger API documentation available at `/docs`.
+  - Static file hosting mounting `/static` and root routing to the UI.
 
-- `chatbot_llm.py` — main chatbot script
-- `my_env/` — local virtual environment with Python dependencies
+- **🐳 Production & Docker Deployment**:
+  - Container-ready `Dockerfile` with multi-platform CPU compatibility.
+  - 1-click Windows launcher scripts (`start_web.bat` and `start_web.ps1`).
 
-## Requirements
+- **💻 Original CLI Preserved**:
+  - Classic terminal chat mode is still available via `chatbot_llm.py`.
 
-Before running the chatbot, make sure you have:
+---
 
-- Python 3.11
-- Internet access to download the Hugging Face model on first run
-- A machine capable of running a ~360M parameter model in CPU mode
+## 📁 Project Structure
 
-## Setup
-
-### 1. Open a terminal in the project folder
-
-From the project root:
-
-```powershell
-cd "C:\Users\Vedant Agrawal\Desktop\casual_llm"
+```text
+casual_llm/
+├── main.py              # FastAPI server (SSE streaming, endpoints, static mounts)
+├── run.py               # Launcher script with auto-browser opening & CLI args
+├── start_web.bat        # 1-click Windows Command Prompt launcher
+├── start_web.ps1        # 1-click Windows PowerShell launcher
+├── chatbot_llm.py       # Terminal CLI chatbot
+├── requirements.txt     # Python dependencies
+├── Dockerfile           # Container build configuration
+├── .dockerignore        # Docker build ignore patterns
+├── static/              # Frontend Web UI
+│   ├── index.html       # Semantic HTML layout, modals, and templates
+│   ├── style.css        # Responsive CSS styling, dark/light theme variables
+│   └── app.js           # Client logic: SSE streaming reader, markdown parser, history
+└── README.md            # Project documentation
 ```
 
-### 2. Use the project virtual environment
+---
 
-The workspace already includes a local environment in `my_env/`.
+## 🚀 Quick Start (Local Web UI)
 
+### 1. Activate the Project Environment
+
+On Windows (PowerShell):
 ```powershell
 .\my_env\Scripts\Activate.ps1
 ```
 
-If you are using Command Prompt instead of PowerShell:
-
+On Windows (Command Prompt):
 ```cmd
 my_env\Scripts\activate.bat
 ```
 
-### 3. Install or verify dependencies
-
-If needed, install the required packages:
+### 2. Install Requirements
 
 ```powershell
-python -m pip install transformers torch
+pip install -r requirements.txt
 ```
 
-This project uses the Hugging Face `transformers` library and PyTorch.
+### 3. Launch the Server
 
-## Run the chatbot
+Run the Python launcher:
+```powershell
+python run.py
+```
 
-Start the app with:
+Or double-click `start_web.bat` (or run `.\start_web.ps1`).
+
+Your browser will automatically open:
+- **Web UI**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **API Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+#### CLI Options for `run.py`
+
+```powershell
+python run.py --host 0.0.0.0 --port 8080 --no-browser --reload
+```
+
+- `--host`: Bind address (default `127.0.0.1`).
+- `--port`: Port number (default `8000`).
+- `--no-browser`: Disable automatic browser opening.
+- `--reload`: Enable hot-reloading for code development.
+
+---
+
+## 🔌 API Reference
+
+### 1. `POST /api/chat/stream`
+Streams generated tokens in real-time as Server-Sent Events (`text/event-stream`).
+
+**Request Body**:
+```json
+{
+  "messages": [
+    {"role": "user", "content": "Tell me a quick joke!"}
+  ],
+  "system_prompt": "You are a very friendly assistant.",
+  "temperature": 0.7,
+  "top_p": 0.85,
+  "max_new_tokens": 256,
+  "repetition_penalty": 1.15
+}
+```
+
+**SSE Event Stream**:
+```text
+data: {"token": "Why"}
+
+data: {"token": " don't"}
+
+data: {"token": " scientists"}
+
+...
+
+data: {"done": true}
+```
+
+### 2. `POST /api/chat`
+Standard non-streaming JSON endpoint.
+
+**Response**:
+```json
+{
+  "role": "assistant",
+  "content": "Why don't scientists trust atoms? Because they make up everything!"
+}
+```
+
+### 3. `GET /api/health`
+Returns health status and model availability.
+
+**Response**:
+```json
+{
+  "status": "ready",
+  "model_name": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "device": "cpu",
+  "error": null
+}
+```
+
+---
+
+## 🐳 Docker Deployment
+
+You can build and deploy the containerized application anywhere Docker is supported:
+
+```bash
+# Build the Docker image
+docker build -t casual-llm .
+
+# Run the container on port 8000
+docker run -p 8000:8000 casual-llm
+```
+
+Then visit `http://localhost:8000`.
+
+---
+
+## ⌨️ Terminal CLI Mode
+
+If you prefer using the command-line interface directly in your terminal, run:
 
 ```powershell
 python chatbot_llm.py
 ```
 
-You will see output similar to:
+Type `exit` to quit the session.
 
-```text
-Loading model...
-Chatbot started. Type 'exit' to quit.
-> 
-```
+---
 
-Then type a message and press Enter. The model will respond in the terminal.
+## 📄 License
 
-## How it works
-
-The script does the following:
-
-1. Loads the `SmolLM2-360M-Instruct` tokenizer and model.
-2. Sets a friendly system prompt.
-3. Keeps the last few messages as context to maintain a short conversation history.
-4. Encodes the prompt with `apply_chat_template`.
-5. Generates a response with `model.generate(...)`.
-6. Prints the generated answer to the console.
-
-The loop continues until you type:
-
-```text
-exit
-```
-
-## Example interaction
-
-```text
-> Hello there!
-Bot: Hi! It’s great to meet you. How can I help today?
-
-> Tell me a fun fact about Python.
-Bot: Python is a very beginner-friendly language, and it’s used in everything from automation to AI research.
-```
-
-## Notes and customization
-
-You can customize the behavior by editing `chatbot_llm.py`:
-
-- Change the model name
-- Modify the system prompt
-- Adjust generation settings like:
-  - `max_new_tokens`
-  - `temperature`
-  - `top_p`
-  - `repetition_penalty`
-- Change the number of recent messages kept in history
-
-## Troubleshooting
-
-### Model download is slow
-
-The first run downloads the model files from Hugging Face. This may take a few minutes depending on your internet speed.
-
-### CUDA or GPU issues
-
-This script is configured to run on CPU using:
-
-```python
-device_map="cpu"
-```
-
-If you want to try GPU execution later, you can update the model loading code accordingly.
-
-### Runtime errors from missing packages
-
-If Python reports missing imports, reinstall the dependencies:
-
-```powershell
-python -m pip install transformers torch
-```
-
-## License
-
-This project is intended for local experimentation and learning. If you plan to use it in a production or public-facing setting, review the model license and the Hugging Face terms for the specific model you download.
-
-## Summary
-
-This is a simple personal/local LLM chatbot for learning, prototyping, and experimenting with small transformer models directly from your terminal.
+This project is created for local experimentation and deployment of lightweight open-source language models. Review the `HuggingFaceTB/SmolLM2-360M-Instruct` license on Hugging Face for model usage terms.

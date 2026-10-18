@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casual LLM — SmolLM2 Chat</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+              <rect x="4" y="8" width="16" height="12" rx="4"/>
+              <path d="M9 13h.01M15 13h.01M9 17h6"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h2>Casual LLM</h2>
+            <span class="subtext">SmolLM2-360M</span>
+          </div>
+        </div>
+        <button class="icon-btn close-sidebar-btn" id="closeSidebarBtn" title="Close Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn btn-primary new-chat-btn" id="newChatBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Chat</span>
+        </button>
+      </div>
+
+      <div class="sidebar-section-title">Conversations</div>
+      <div class="conversations-list" id="conversationsList">
+        
+      </div>
+
+      
+      <div class="sidebar-footer">
+        <div class="status-indicator-card">
+          <div class="status-dot-wrapper">
+            <span class="status-dot" id="sidebarStatusDot"></span>
+          </div>
+          <div class="status-text">
+            <div class="status-title" id="sidebarStatusTitle">Connecting...</div>
+            <div class="status-sub">PyTorch CPU</div>
+          </div>
+        </div>
+        <div class="sidebar-footer-buttons">
+          <button class="footer-btn" id="openSettingsBtn" title="Inference Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
+          </button>
+          <button class="footer-btn" id="clearAllChatsBtn" title="Clear All History">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Clear All</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    
+    <main class="main-content">
+      
+      <header class="top-nav">
+        <div class="nav-left">
+          <button class="icon-btn sidebar-toggle-btn" id="toggleSidebarBtn" title="Toggle Sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="model-badge">
+            <span class="badge-dot"></span>
+            <span class="badge-label">SmolLM2-360M-Instruct</span>
+          </div>
+        </div>
+
+        <div class="nav-right">
+          <button class="icon-btn" id="navSettingsBtn" title="Generation Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+          </button>
+          <button class="icon-btn" id="clearChatBtn" title="Clear Current Chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+          </button>
+          <button class="icon-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      
+      <div class="chat-viewport" id="chatViewport">
+        
+        <div class="welcome-screen" id="welcomeScreen">
+          <div class="welcome-card">
+            <div class="welcome-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+            </div>
+            <h1>How can I help you today?</h1>
+            <p>Casual LLM runs SmolLM2 locally on your machine with fast, warm responses. Choose a starter below or type your own question.</p>
+            
+            <div class="prompt-chips">
+              <button class="chip" data-prompt="Tell me a fun and surprising fact about the universe!">
+                <span class="chip-icon">🪐</span>
+                <span class="chip-text">Fun universe fact</span>
+              </button>
+              <button class="chip" data-prompt="Write a clean Python function that checks if a string is a palindrome.">
+                <span class="chip-icon">🐍</span>
+                <span class="chip-text">Python palindrome script</span>
+              </button>
+              <button class="chip" data-prompt="Draft a friendly email congratulating a colleague on their work promotion.">
+                <span class="chip-icon">✉️</span>
+                <span class="chip-text">Promotion congrats email</span>
+              </button>
+              <button class="chip" data-prompt="Give me 3 practical tips for staying focused while coding or studying.">
+                <span class="chip-icon">🎯</span>
+                <span class="chip-text">Focus and study tips</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="messages-container" id="messagesContainer">
+          
+        </div>
+      </div>
+
+      
+      <div class="input-panel">
+        <div class="stop-generating-container" id="stopContainer">
+          <button class="stop-btn" id="stopBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+            </svg>
+            <span>Stop generating</span>
+          </button>
+        </div>
+
+        <div class="input-box-wrapper">
+          <textarea
+            id="chatInput"
+            class="chat-textarea"
+            placeholder="Type your message... (Enter to send, Shift+Enter for newline)"
+            rows="1"
+          ></textarea>
+          <button class="send-btn" id="sendBtn" title="Send message" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="input-footer">
+          <span>SmolLM2-360M-Instruct</span>
+          <span class="footer-separator">•</span>
+          <span>FastAPI Deployment</span>
+          <span class="footer-separator">•</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </main>
+
+    
+    <div class="settings-modal-backdrop" id="settingsModalBackdrop">
+      <div class="settings-card">
+        <div class="settings-header">
+          <h3>Inference Settings</h3>
+          <button class="icon-btn" id="closeSettingsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="settings-body">
+          
+          <div class="form-group">
+            <label for="personaSelect">Assistant Persona Preset</label>
+            <select id="personaSelect" class="form-select">
+              <option value="cheerful">Cheerful & Friendly (Default)</option>
+              <option value="coding">Expert Python Coder</option>
+              <option value="concise">Concise & Direct</option>
+              <option value="creative">Creative & Imaginative</option>
+              <option value="custom">Custom Persona</option>
+            </select>
+          </div>
+
+          
+          <div class="form-group">
+            <label for="systemPromptInput">System Prompt</label>
+            <textarea id="systemPromptInput" class="form-textarea" rows="3"></textarea>
+            <span class="form-help">Guides the model's behavior and personality.</span>
+          </div>
+
+          
+          <div class="form-group">
+            <div class="range-header">
+              <label for="tempRange">Temperature</label>
+              <span class="range-val" id="tempVal">0.7</span>
+            </div>
+            <input type="range" id="tempRange" min="0.0" max="1.5" step="0.05" value="0.7">
+            <span class="form-help">Lower = more deterministic, higher = more creative.</span>
+          </div>
+
+          
+          <div class="form-group">
+            <div class="range-header">
+              <label for="tokensRange">Max Output Tokens</label>
+              <span class="range-val" id="tokensVal">256</span>
+            </div>
+            <input type="range" id="tokensRange" min="32" max="512" step="16" value="256">
+            <span class="form-help">Maximum response length generated per turn.</span>
+          </div>
+
+          
+          <div class="form-group">
+            <div class="range-header">
+              <label for="topPRange">Top-P (Nucleus Sampling)</label>
+              <span class="range-val" id="topPVal">0.85</span>
+            </div>
+            <input type="range" id="topPRange" min="0.1" max="1.0" step="0.05" value="0.85">
+            <span class="form-help">Limits tokens to those with cumulative probability top-p.</span>
+          </div>
+
+          
+          <div class="form-group">
+            <div class="range-header">
+              <label for="repPenaltyRange">Repetition Penalty</label>
+              <span class="range-val" id="repPenaltyVal">1.15</span>
+            </div>
+            <input type="range" id="repPenaltyRange" min="1.0" max="1.5" step="0.05" value="1.15">
+            <span class="form-help">Penalizes repeated phrases and loops.</span>
+          </div>
+        </div>
+
+        <div class="settings-footer">
+          <button class="btn btn-secondary" id="resetDefaultsBtn">Reset to Defaults</button>
+          <button class="btn btn-primary" id="saveSettingsBtn">Save & Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
