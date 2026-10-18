@@ -1,4 +1,4 @@
-# Casual LLM Chatbot
+# Custom LLM Chatbot
 
 A lightweight local chatbot that runs a small instruction-tuned language model from Hugging Face in the terminal. The app loads `HuggingFaceTB/SmolLM2-360M-Instruct`, keeps a short chat history, and generates warm, casual responses based on your prompts.
 
